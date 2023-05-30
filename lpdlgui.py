@@ -4,7 +4,7 @@ import shutil
 import sys
 import time
 from contextlib import closing
-
+import shutil
 import aiohttp
 import tqdm
 from PIL import Image
@@ -12,10 +12,7 @@ from PyQt5.QtWidgets import (QAction, QApplication, QCheckBox, QDialog,
                              QFileDialog, QInputDialog, QLabel, QLineEdit,
                              QMainWindow, QMessageBox, QPushButton, QSpinBox,
                              QVBoxLayout, QWidget, QDialogButtonBox)
-
-urls = []
-OUTPUT_FOLDER = "librarybooks"
-FILES_PATH = os.path.join(OUTPUT_FOLDER, "files")
+urls=[]
 cookies = {
     'PHPSESSID': 'h9i7ji958j3vufec7nejlv7dqd',
     'user_auth': 'MjAwMTYwMDA4ODYyMTBAMjMzOV8yMzM5X2RhYTc3MDJjYzk5YzMzMDBiOWQ2MjE2Y2Y3NzRiN2VjZWM0Njc2OGFfMTY4NTM1MzM1MF8xNjg1Mzk2MjUx',
@@ -31,9 +28,7 @@ async def main(loop):
         return await asyncio.gather(*tasks)
 
 async def download(session, url, progress_queue):
-    global FILES_PATH
     try:
-        os.makedirs(FILES_PATH, exist_ok=True)
         async with session.get(url) as response:
             target = os.path.join(FILES_PATH, str(urls.index(url)).zfill(3) + f"_{NAME}.jpeg")
             size = int(response.headers.get('content-length', 0)) or None
@@ -52,9 +47,9 @@ async def download(session, url, progress_queue):
             await progress_queue.put(position)
             return target
     except Exception as e:
-        print("Whoops! Something Went wrong... Are you sure you set all values?", e)
+        print("Fuck?", url, e)
 
-def pdf_conv():
+def pdf_conv(OUTPUT_FOLDER):
     try:
         image_1 = Image.open(os.path.join(FILES_PATH, f'000_{NAME}.jpeg'))
         im_1 = image_1.convert('RGB')
@@ -71,8 +66,8 @@ def pdf_conv():
         image_list.pop(0)
         im_1.save(os.path.join(OUTPUT_FOLDER, f'{NAME}.pdf'), save_all=True, append_images=image_list)
         shutil.rmtree(FILES_PATH)
-    except NameError:
-        print("Invalid File Name")
+    except NameError as e:
+        print("Invalid File Name", e)
 class InputForm(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -95,6 +90,7 @@ class InputForm(QDialog):
         self.pages_label = QLabel("Number of Pages:")
         self.pages_input = QSpinBox()
         self.pages_input.setMinimum(1)
+        self.pages_input.setMaximum(1000)
 
         self.library_id_label = QLabel("Library ID:")
         self.library_id_input = QLineEdit()
@@ -134,7 +130,7 @@ class InputForm(QDialog):
             self.OUTPUT_FOLDER = folder
             self.FILES_PATH = os.path.join(self.OUTPUT_FOLDER, "files")
             os.makedirs(self.FILES_PATH, exist_ok=True)
-
+        return folder
     def reject(self):
         exit(app.exec_)
 class MainWindow(QMainWindow):  
@@ -153,7 +149,7 @@ class MainWindow(QMainWindow):
 
         if form.exec_() == QDialog.Accepted:
             book_id = form.book_id_input.text()
-            output_dir = form.output_dir_label()
+            output_dir = form.OUTPUT_FOLDER
             download_images = form.download_images_checkbox.isChecked()
             convert_to_pdf = form.convert_to_pdf_checkbox.isChecked()
             NAME = form.NAME_input.text()
@@ -172,27 +168,32 @@ class MainWindow(QMainWindow):
             print("Library ID:", library_id)
             print("Mangasee Mode:", mangasee_mode)
             print("Chapter:", chapter)
-            if mangasee_mode:
-                for i in range(1, int(pages)):
-                    urls.append(f'https://official.lowee.us/manga/{book_id}/{chapter.zfill(4)}-{str(i).zfill(3)}.png')
-            else:
-                for i in range(1, int(pages)):
-                    urls.append(f'https://{library_id}.librarypass.com/reader/image/{book_id}/{str(i)}/0')
+            FILES_PATH = os.path.join(form.OUTPUT_FOLDER, 'files')
+            
             if download_images:
+                if mangasee_mode:
+                    for i in range(1, int(pages)):
+                        urls.append(f'https://official.lowee.us/manga/{book_id}/{chapter.zfill(4)}-{str(i).zfill(3)}.png')
+                else:
+                    for i in range(1, int(pages)):
+                        urls.append(f'https://{library_id}.librarypass.com/reader/image/{book_id}/{str(i)}/0')
                 try:
                     st = time.time()
                     with closing(asyncio.get_event_loop()) as loop:
                         for tgt in loop.run_until_complete(main(loop)):
+                            print('fuck')
                             pass
                     et = time.time()
                     elapsed_time = et - st
-                    print(chr(27) + "[2J")
                     print(f'Downloaded {pages} files in {elapsed_time} seconds')
                 except Exception as e:
                     print(chr(27) + "[2J")
                     print("Whoops! Something Went wrong... Are you sure you set all values?", e)
+            if convert_to_pdf:
+                pdf_conv(form.OUTPUT_FOLDER)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
-    sys.exit(app.exec_())
+    app.exec_()
+    sys.exit()
