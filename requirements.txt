@@ -1,3 +1,5 @@
 tqdm
 pyinstaller
 pyQt5
+aiohttp
+Pillow
