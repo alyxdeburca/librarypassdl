@@ -2,7 +2,6 @@ name: Build GUI exe with Pyinstaller
 
 on:
   push:
-  workflow_run:
 jobs:
   build:
 
