@@ -4,10 +4,9 @@ on:
   push:
 
 
-permissions: read-all|write-all
 
 jobs:
-
+permissions: read-all|write-all
   createrelease:
     name: Create Release
     runs-on: [ubuntu-latest]
