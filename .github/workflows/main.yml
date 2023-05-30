@@ -1,10 +1,8 @@
 name: Build GUI exe with Pyinstaller
 
 on:
-  workflow_dispatch:
-    inputs:
-      tags:
-        description: 'test build tags'
+  push:
+  workflow-dispatch:
 jobs:
   build:
 
