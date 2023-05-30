@@ -39,8 +39,8 @@ jobs:
             CMD_BUILD: >
                 pyinstaller -F -w -n lpdl lpdlgui.py &&
                 cd dist/ &&
-                zip -r9 lpdl lpdl.app/                
-            OUT_FILE_NAME: lpdl.zip
+                zip -r9 lpdl_osx lpdl.app/                
+            OUT_FILE_NAME: lpdl_osx.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
