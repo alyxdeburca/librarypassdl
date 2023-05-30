@@ -11,7 +11,6 @@ a = Analysis(
     datas=[],
     hiddenimports=[],
     hookspath=[],
-    hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     win_no_prefer_redirects=False,
@@ -28,7 +27,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='lpdlgui',
+    name='LPDL',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -44,7 +43,7 @@ exe = EXE(
 )
 app = BUNDLE(
     exe,
-    name='lpdlgui.app',
+    name='LPDL.app',
     icon=None,
     bundle_identifier=None,
 )
